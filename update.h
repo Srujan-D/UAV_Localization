@@ -1,21 +1,21 @@
 #include "prediction.h"
 
 class Update{
-    private:
-        /* data */
+    // private:
+    public:
         Prediction* predict;
         bool isGPS = false;
-    public:
+    // public:
         Update(/* args */);
         ~Update();
-        MatrixXd H();
-        MatrixXd K();
-        VectorXd y();
-        MatrixXd h();
-        MatrixXd R_k();
-        MatrixXd UpdateCovar();
-        MatrixXd UpdateEst();
-        MatrixXd ComputeK();
+        Eigen::MatrixXd H();
+        Eigen::MatrixXd K();
+        Eigen::VectorXd y();
+        Eigen::MatrixXd h();
+        Eigen::MatrixXd R_k();
+        Eigen::MatrixXd UpdateCovar();
+        Eigen::MatrixXd UpdateEst();
+        Eigen::MatrixXd ComputeK();
 };
 
 Update::Update(/* args */)

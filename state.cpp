@@ -15,7 +15,7 @@ State::State(geometry_msgs::Point p, geometry_msgs::Quaternion q, geometry_msgs:
     this->time_now = time_now;
 } 
 
-State::State(MatrixXd stateVector){
+State::State(Eigen::MatrixXd stateVector){
     this->p.x = stateVector(0,0);
     this->p.y = stateVector(1,0);
     this->p.z = stateVector(2,0);
@@ -31,8 +31,8 @@ State::State(MatrixXd stateVector){
 
 } 
 
-Vector10d State::stateToMatrix(){
-    Vector10d vec(10,1);
+Eigen::Vector10d State::stateToMatrix(){
+    Eigen::Vector10d vec(10,1);
     vec(0,0) = p.x;
     vec(1,0) = p.y;
     vec(2,0) = p.z;

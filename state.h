@@ -22,15 +22,15 @@
 #include <iostream>
 #include <fstream>
 
-using namespace laser_assembler;
-using Eigen::MatrixXd;
-using Eigen::MatrixXf;
-using Eigen::VectorXd;
+// using namespace laser_assembler;
+// using Eigen::MatrixXd;
+// using Eigen::VectorXd;
 
 class State{
-    private:
+    // private:
         // float x, y, z, qx, qy, qz, qw, vx, vy, vz, ax, ay, az, avx, avy, avz, g, time_sec; // roll, pitch, yaw;
         
+    public:
         geometry_msgs::Point p;
         geometry_msgs::Quaternion q;
         geometry_msgs::Twist v;
@@ -44,16 +44,16 @@ class State{
         ros::Time time_sec = ros::Time::now().toSec;
         ros::Time time;
 
-    public:
+    // public:
     
         State();
         ~State();
 
         State(geometry_msgs::Point p, geometry_msgs::Quaternion q, geometry_msgs::Twist v, ros::Time time_now = ros::Time::now());
 
-        State(MatrixXd stateVector);
+        State(Eigen::MatrixXd stateVector);
 
-        MatrixXd stateToMatrix();
+        Eigen::MatrixXd stateToMatrix();
 
 };
 
