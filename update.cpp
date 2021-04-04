@@ -1,72 +1,105 @@
 #include "update.h"
 
-Eigen::VectorXd Update::y(){
-    Eigen::Vector9d y_meas;
-    if(isGPS){
+VectorXd Update::y(sensor_msgs::Imu msg_imu, sensor_msgs::Imu msg_cam_imu, nav_msgs::Odometry msg_cam_odom, sensor_msgs::LaserScan msg_lidar, sensor_msgs::NavSatFix msg_gps)
+{
+    string ongoing = "lidar";
+    if (msg_gps.header.time < msg_imu.header.time)
+    {
         // TODO
+        Update::y_meas << msg_gps.latitude, msg_gps.longitude, msg_gps.altitude, msg_cam_odom.twist.twist.linear.x, msg_cam_odom.twist.twist.linear.y, msg_cam_odom.twist.twist.linear.z, msg_cam_imu.linear_acceleration.x, msg_cam_imu.linear_acceleration.y, msg_cam_imu.linear_acceleration.z;
     }
-    else{
+    else
+    {
         // TODO
+        Update::y_meas << msg_cam_odom.pose.pose.position.x, msg_cam_odom.pose.pose.position.y, msg_cam_odom.pose.pose.position.z, msg_cam_odom.twist.twist.linear.x, msg_cam_odom.twist.twist.linear.y, msg_cam_odom.twist.twist.linear.z, msg_cam_imu.linear_acceleration.x, msg_cam_imu.linear_acceleration.y, msg_cam_imu.linear_acceleration.z;
+        
+    }
+    return Update::y_meas;
+}
+
+VectorXd Update::y_gps(sensor_msgs::Imu msg_imu, sensor_msgs::Imu msg_cam_imu, nav_msgs::Odometry msg_cam_odom, sensor_msgs::LaserScan msg_lidar, sensor_msgs::NavSatFix msg_gps)
+{
+
+    if (msg_gps.header.time < msg_imu.header.time)
+    {
+        // TODO
+
+        Update::y_meas << msg_gps.latitude, msg_gps.longitude, msg_gps.altitude, msg_cam_odom.twist.twist.linear.x, msg_cam_odom.twist.twist.linear.y, msg_cam_odom.twist.twist.linear.z, msg_cam_imu.linear_acceleration.x, msg_cam_imu.linear_acceleration.y, msg_cam_imu.linear_acceleration.z;
+    }
+    return Update::y_meas;
+}
+
+VectorXd Update::y_lidar(sensor_msgs::Imu msg_imu, sensor_msgs::Imu msg_cam_imu, nav_msgs::Odometry msg_cam_odom, sensor_msgs::LaserScan msg_lidar, sensor_msgs::NavSatFix msg_gps)
+{
+    if (msg_lidar.header.time < msg_lidar.header.time)
+    {
+        // TODO
+        y_meas << msg_cam_odom.pose.pose.position.x, msg_cam_odom.pose.pose.position.y, msg_cam_odom.pose.pose.position.z, msg_cam_odom.twist.twist.linear.x, msg_cam_odom.twist.twist.linear.y, msg_cam_odom.twist.twist.linear.z, msg_cam_imu.linear_acceleration.x, msg_cam_imu.linear_acceleration.y, msg_cam_imu.linear_acceleration.z;
     }
     return y_meas;
 }
 
-Eigen::MatrixXd Update::h(){
-    Eigen::MatrixXd h_meas;
-    if(isGPS){
+MatrixXd Update::h()
+{
+    MatrixXd h_meas;
+    if (isGPS)
+    {
         // TODO
     }
-    else{
+    else
+    {
         // TODO
     }
     return h_meas;
 }
 
-Eigen::MatrixXd Update::H(){
-    Eigen::MatrixXd H_meas;
-    if(isGPS){
-        // TODO
-    }
-    else{
-        // TODO
-    }
+MatrixXd Update::H()
+{
+    MatrixXd H_meas;
+    H_meas << 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
     return H_meas;
 }
 
-Eigen::MatrixXd Update::K(){
-    Eigen::MatrixXd _K;
-    if(isGPS){
-        // TODO
-    }
-    else{
-        // TODO
-    }
+MatrixXd Update::K()
+{
+    MatrixXd _K;
+    _K = Update::ComputeK();
     return _K;
 }
 
-Eigen::MatrixXd Update::R_k(){
-    Eigen::MatrixXd R_meas;
-    if(isGPS){
-        // TODO
-    }
-    else{
-        // TODO
-    }
+MatrixXd Update::R_k()
+{
+    Dynamic2D R_meas;
+    R_meas = 0.05 * Dynamic2D::Identity(9, 9);
     return R_meas;
 }
 
-Eigen::MatrixXd Update::UpdateCovar(){
-    Eigen::Dynamic2D I;
-    I = Eigen::Dynamic2D::Identity(10,10);
-    return (I - Update::K * Update::H) * predict->PredictedCovariance;
+MatrixXd Update::UpdateCovar(MatrixXd K)
+{
+    Dynamic2D I;
+    I = Dynamic2D::Identity(10, 10);
+    return (I - K * Update::H) * predict->PredictedCovariance;
 }
 
-Eigen::MatrixXd Update::UpdateEst(){
+MatrixXd Update::UpdateEst(MatrixXd K, sensor_msgs::Imu msg_imu, sensor_msgs::Imu msg_cam_imu, nav_msgs::Odometry msg_cam_odom, sensor_msgs::LaserScan msg_lidar, sensor_msgs::NavSatFix msg_gps)
+{
     // TODO: Give arguments to the functions K, y, h
-    return predict->current_state + Update::K*(Update::y - Update::h);
+    Vector10d temp;
+    // MatrixXd K = Update::ComputeK();
+    temp = State::stateToMatrix(predict->current_state) + K * (Update::y_lidar(sensor_msgs::Imu msg_imu, sensor_msgs::Imu msg_cam_imu, nav_msgs::Odometry msg_cam_odom, sensor_msgs::LaserScan msg_lidar, sensor_msgs::NavSatFix msg_gps) - Update::H * State::stateToMatrix(predict->current_state));
+    temp = temp + K * (Update::y_gps(sensor_msgs::Imu msg_imu, sensor_msgs::Imu msg_cam_imu, nav_msgs::Odometry msg_cam_odom, sensor_msgs::LaserScan msg_lidar, sensor_msgs::NavSatFix msg_gps) - Update::H * temp);
+    return temp;
 }
 
-Eigen::MatrixXd Update::ComputeK(){
+MatrixXd Update::ComputeK()
+{
     return predict->PredictedCovariance * Update::H * ((Update::H * predict->PredictedCovariance * Update::H.transpose() + Update::R_k).inverse());
 }
-

@@ -16,15 +16,26 @@
 #include <sstream>
 #include <vector>
 #include <Eigen/Dense>
+#include <unsupported/Eigen/MatrixFunctions>
 #define _USE_MATH_DEFINES
 #include <math.h> 
 // #include <pcl_ros/point_cloud.h>
 #include <iostream>
 #include <fstream>
-
+#include <string>
 // using namespace laser_assembler;
-// using Eigen::MatrixXd;
-// using Eigen::VectorXd;
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+using Eigen::Vector10d;
+using Eigen::Vector4d;
+using Eigen::Matrix3d;
+using Eigen::Matrix4d;
+using Eigen::Matrix10d;
+using Eigen::Dynamic2D;
+using geometry_msgs::Vector3d;
+
+
+
 
 class State{
     // private:
@@ -35,6 +46,7 @@ class State{
         geometry_msgs::Quaternion q;
         geometry_msgs::Twist v;
         geometry_msgs::Accel a;
+        float g = 9.8062;
 
         geometry_msgs::Vector3 lin_vel = v.linear;
         geometry_msgs::Vector3 ang_vel = v.angular;
@@ -51,9 +63,9 @@ class State{
 
         State(geometry_msgs::Point p, geometry_msgs::Quaternion q, geometry_msgs::Twist v, ros::Time time_now = ros::Time::now());
 
-        State(Eigen::MatrixXd stateVector);
+        State(MatrixXd stateVector);
 
-        Eigen::MatrixXd stateToMatrix();
+        Vector10d stateToMatrix();
 
 };
 

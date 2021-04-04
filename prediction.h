@@ -10,17 +10,17 @@ class Prediction{
         geometry_msgs::Odometry::CosntPtr cam;
         sensor_msgs::Imu::CosntPtr imu;
 
-        Eigen::MatrixXd noiseQk = Eigen::MatrixXd::Zero(10,10);
-        Eigen::MatrixXd Covariance_KplusOne = Eigen::MatrixXd::Zero(10,10);
-        Eigen::MatrixXd Covariance_K = Eigen::MatrixXd::Zero(10,10);
+       MatrixXd noiseQk =MatrixXd::Zero(10,10);
+       MatrixXd Covariance_KplusOne =MatrixXd::Zero(10,10);
+       MatrixXd Covariance_K =MatrixXd::Zero(10,10);
 
     // public:
         Prediction();
         ~Prediction();
-        Eigen::Matrix3d R_q(State *s);
+        Matrix3d R_q(State *s);
         State* f(State* prev_state, State* current_state, State* imu_measured_state);
-        Eigen::MatrixXd F(State* prev_state, State* current_state);
-        Eigen::MatrixXd PredictedCovariance(State* prev_state, State* current_state);
+        MatrixXd F(State* prev_state, State* current_state);
+        MatrixXd PredictedCovariance(State* prev_state, State* current_state);
         void predict(State* prev_state, State* current_state);
 };
 
